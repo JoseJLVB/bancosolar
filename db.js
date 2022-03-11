@@ -22,26 +22,10 @@ async function insertar(nombre, balance) {
     return rows;
 }
 
-async function consultar() {
-    let client 
-    try{
-        client = await pool.connect();
-    } catch (conn_error) {
-        console.log("Client Error")
-    }
+async function getUsuarios() {
+    const client = await pool.connect()
+    const { rows } = await client.query('select * from usuarios')
+    return rows
+};
 
-    let res;
-    try{
-        res = await client.query({
-            text: `select * from usuarios`
-        });
-    } catch (err) {
-        console.log("El error es: " + err)
-        return;
-    }
-    
-    client.release()
-    return res.rows;
-}
-
-module.exports = {insertar}
+module.exports = {insertar, getUsuarios}
