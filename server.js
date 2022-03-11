@@ -1,5 +1,5 @@
 const express = require('express')
-const {insertar, getUsuarios, editUsuarios, deleteUsuario, addTransfer} = require('./db.js')
+const {insertar, getUsuarios, editUsuarios, deleteUsuario, addTransfer, getTransfer} = require('./db.js')
 const app = express()
 app.use(express.static('static'))
 
@@ -65,7 +65,7 @@ app.post('/transferencia', async(req, res) => {
     req.on("end", async() => {
         try {
             body = JSON.parse(body);
-            await addTransfer(body.emisor, body.receptor, body.monto);
+            await addTransfer(body.emisor, body.receptor, body.monto, body.fecha);
             res.json({ todo: 'ok' });
         } catch (error) {
             console.log( error);
@@ -74,7 +74,13 @@ app.post('/transferencia', async(req, res) => {
 });
 
 app.get('/transferencias', async (req, res) => {
-    res.json([])
-})
+    let transfer
+    try {
+        transfer = await getTransfer();
+    } catch (error) {
+        return res.send(error.message)
+    }
+    res.send(transfer)
+});
 
 app.listen(3000, () => console.log('Servidor en puerto 3000'))

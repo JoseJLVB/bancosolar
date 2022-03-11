@@ -49,7 +49,7 @@ async function deleteUsuario(id) {
     client.release()
 }
 
-async function addTransfer(transEmisor, transReceptor, monto) {
+async function addTransfer(transEmisor, transReceptor, monto, fecha) {
 
     const client = await pool.connect();
     let { rows } = await client.query({
@@ -81,22 +81,27 @@ async function addTransfer(transEmisor, transReceptor, monto) {
         text: 'update usuarios set balance=$1 where id=$2',
         values: [montoReceptor, receptor.id]
     });
-
+    
     await client.query({
-        text: "insert into transferencias (emisor, receptor, monto) values ($1, $2, $3)",
-        values: [emisor.id, receptor.id, transMonto]
+        text: "insert into transferencias (emisor, receptor, monto, fecha) values ($1, $2, $3, $4)",
+        values: [emisor.id, receptor.id, transMonto, new Date(Date.now())]
     });
 
     client.release();
     return transfer.rows;
 }
 
-    
-
-async function  getTransfer() {
+async function getTransfer() {
     const client = await pool.connect()
-    const { rows } = await client.query({
-        text: 'select '
+    const res = await client.query({
+        text: `select transfer.id, transfer.emisor, usuarios.nombre as receptor, transfer.monto, 
+        transfer.fecha from (select transferencias.fecha, usuarios.nombre as emisor, 
+        transferencias.receptor, transferencias.monto, transferencias.id 
+        from transferencias join usuarios on usuarios.id = transferencias.emisor) 
+        as transfer join usuarios on usuarios.id = transfer.receptor`,
+        rowMode: 'array'
     })
+    client.release()
+    return res.rows
 }
-module.exports = {insertar, getUsuarios, editUsuarios, deleteUsuario, addTransfer}
+module.exports = {insertar, getUsuarios, editUsuarios, deleteUsuario, addTransfer, getTransfer}
