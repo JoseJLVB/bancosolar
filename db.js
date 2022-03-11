@@ -28,4 +28,15 @@ async function getUsuarios() {
     return rows
 };
 
-module.exports = {insertar, getUsuarios}
+async function editUsuarios(id, nombre, balance) {
+    const client = await pool.connect()
+    
+    const res = await client.query({
+        text: `update usuarios set nombre=$2, balance=$3 where id=$1`,
+        values: [id, nombre, balance]
+    })
+    client.release()
+    return res
+}
+
+module.exports = {insertar, getUsuarios, editUsuarios}

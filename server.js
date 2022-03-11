@@ -1,5 +1,5 @@
 const express = require('express')
-const {insertar, getUsuarios} = require('./db.js')
+const {insertar, getUsuarios, editUsuarios} = require('./db.js')
 const app = express()
 app.use(express.static('static'))
 
@@ -29,6 +29,23 @@ app.get('/usuarios', async (req, res) => {
     }
 });
 
+app.put('/usuario', async (req, res) => {
+    let body = ""
+
+    req.on('data', (data) => {
+        body += data
+    })
+
+    req.on('end', async () => {
+        const datos = Object.values(JSON.parse(body));
+        try{
+            await editUsuarios(req.query.id, datos[0], datos[1])
+        } catch (error){
+            return res.send(error.message)
+        }
+        res.send('usuario modificado')
+    })
+});
 
 app.get('/transferencias', async (req, res) => {
     res.json([])
