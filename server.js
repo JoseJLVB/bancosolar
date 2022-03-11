@@ -56,22 +56,22 @@ app.delete('/usuario', async (req, res) => {
     res.send('Usuario eliminado exitosamente')
 });
 
-app.post('/transferencia', async (req,res) => {
-    let body = ''
-    req.on('data', (data) => {
+app.post('/transferencia', async(req, res) => {
+    let body = ""
+    req.on("data", (data) => {
         body += data
     })
-    req.on('end', async () => {
-        try{
-            body = JSON.parse(body)
-            console.log(body);
-            await addTransfer(body.emisor, body.receptor, body.monto)
-            res.json({todo: 'ok'}
-        )} catch (error) {
-            res.send('Transferencia realizada exitosamente')
+
+    req.on("end", async() => {
+        try {
+            body = JSON.parse(body);
+            await addTransfer(body.emisor, body.receptor, body.monto);
+            res.json({ todo: 'ok' });
+        } catch (error) {
+            console.log( error);
         }
     })
-})
+});
 
 app.get('/transferencias', async (req, res) => {
     res.json([])

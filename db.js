@@ -49,12 +49,54 @@ async function deleteUsuario(id) {
     client.release()
 }
 
-async function addTransfer(emisor, receptor, monto){
-    const client = await pool.connect()
-    await client.query(
-        'insert into transferencias (emisor, receptor, monto) values ($1, $2, $3) returning*',
-        [emisor, receptor, monto]
-    )
+async function addTransfer(transEmisor, transReceptor, monto) {
+
+    const client = await pool.connect();
+    let { rows } = await client.query({
+        text: 'select * from usuarios where nombre=$1',
+        values: [transEmisor]
+    });
+    const emisor = rows[0];
+
+    const transfer = await client.query({
+        text: 'select * from usuarios where nombre=$1',
+        values: [transReceptor]
+    });
+    const receptor = transfer.rows[0];
+
+    const transMonto = parseInt(monto);
+
+    if (emisor.balance < transMonto) {
+        throw "No tiene saldo suficiente para realizar la transferencia";
+    }
+
+    const montoEmisor = emisor.balance - transMonto;
+    await client.query({
+        text: 'update usuarios set balance=$1 where id=$2',
+        values: [montoEmisor, emisor.id]
+    });
+
+    const montoReceptor = receptor.balance + transMonto;
+    await client.query({
+        text: 'update usuarios set balance=$1 where id=$2',
+        values: [montoReceptor, receptor.id]
+    });
+
+    await client.query({
+        text: "insert into transferencias (emisor, receptor, monto) values ($1, $2, $3)",
+        values: [emisor.id, receptor.id, transMonto]
+    });
+
+    client.release();
+    return transfer.rows;
 }
 
+    
+
+async function  getTransfer() {
+    const client = await pool.connect()
+    const { rows } = await client.query({
+        text: 'select '
+    })
+}
 module.exports = {insertar, getUsuarios, editUsuarios, deleteUsuario, addTransfer}
