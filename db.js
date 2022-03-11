@@ -32,12 +32,12 @@ async function getUsuarios() {
 async function editUsuarios(id, nombre, balance) {
     const client = await pool.connect()
     
-    const res = await client.query({
+    const { rows } = await client.query({
         text: `update usuarios set nombre=$2, balance=$3 where id=$1`,
         values: [id, nombre, balance]
     })
     client.release()
-    return res
+    return rows
 }
 
 async function deleteUsuario(id) {
@@ -48,4 +48,13 @@ async function deleteUsuario(id) {
     )
     client.release()
 }
-module.exports = {insertar, getUsuarios, editUsuarios, deleteUsuario}
+
+async function addTransfer(emisor, receptor, monto){
+    const client = await pool.connect()
+    await client.query(
+        'insert into transferencias (emisor, receptor, monto) values ($1, $2, $3) returning*',
+        [emisor, receptor, monto]
+    )
+}
+
+module.exports = {insertar, getUsuarios, editUsuarios, deleteUsuario, addTransfer}

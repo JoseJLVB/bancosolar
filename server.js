@@ -1,5 +1,5 @@
 const express = require('express')
-const {insertar, getUsuarios, editUsuarios, deleteUsuario} = require('./db.js')
+const {insertar, getUsuarios, editUsuarios, deleteUsuario, addTransfer} = require('./db.js')
 const app = express()
 app.use(express.static('static'))
 
@@ -56,6 +56,22 @@ app.delete('/usuario', async (req, res) => {
     res.send('Usuario eliminado exitosamente')
 });
 
+app.post('/transferencia', async (req,res) => {
+    let body = ''
+    req.on('data', (data) => {
+        body += data
+    })
+    req.on('end', async () => {
+        try{
+            body = JSON.parse(body)
+            console.log(body);
+            await addTransfer(body.emisor, body.receptor, body.monto)
+            res.json({todo: 'ok'}
+        )} catch (error) {
+            res.send('Transferencia realizada exitosamente')
+        }
+    })
+})
 
 app.get('/transferencias', async (req, res) => {
     res.json([])
