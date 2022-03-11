@@ -1,5 +1,5 @@
 const express = require('express')
-const {insertar, getUsuarios, editUsuarios} = require('./db.js')
+const {insertar, getUsuarios, editUsuarios, deleteUsuario} = require('./db.js')
 const app = express()
 app.use(express.static('static'))
 
@@ -46,6 +46,16 @@ app.put('/usuario', async (req, res) => {
         res.send('usuario modificado')
     })
 });
+
+app.delete('/usuario', async (req, res) => {
+    try{
+        await deleteUsuario(req.query.id)
+    } catch (error) {
+        return res.send(error.message)
+    }
+    res.send('Usuario eliminado exitosamente')
+});
+
 
 app.get('/transferencias', async (req, res) => {
     res.json([])

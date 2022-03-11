@@ -1,3 +1,4 @@
+const { query } = require('express');
 const {Pool} = require('pg');
 
 const pool = new Pool({
@@ -39,4 +40,12 @@ async function editUsuarios(id, nombre, balance) {
     return res
 }
 
-module.exports = {insertar, getUsuarios, editUsuarios}
+async function deleteUsuario(id) {
+    const client = await pool.connect()
+    const res = await client.query(
+        "delete from usuarios where id=$1",
+        [id]
+    )
+    client.release()
+}
+module.exports = {insertar, getUsuarios, editUsuarios, deleteUsuario}
